@@ -1,0 +1,89 @@
+# XcodeGen project definition.
+# Generate the Xcode project with:  xcodegen generate
+name: Corner
+options:
+  bundleIdPrefix: com.oguzhankayan
+  deploymentTarget:
+    tvOS: "17.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "3"          # tvOS
+    SWIFT_STRICT_CONCURRENCY: targeted
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: NO
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: NO
+    CODE_SIGN_STYLE: Automatic
+    # DEVELOPMENT_TEAM: ABCDE12345        # <- set your team id when archiving
+
+targets:
+  Corner:
+    type: application
+    platform: tvOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Corner
+        excludes:
+          - "Resources/Sounds/README.md"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.oguzhankayan.corner
+        PRODUCT_NAME: Corner
+        ASSETCATALOG_COMPILER_APPICON_NAME: "App Icon & Top Shelf Image"
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        INFOPLIST_FILE: Corner/Resources/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: Corner
+        ENABLE_PREVIEWS: YES
+        SWIFT_EMIT_LOC_STRINGS: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+    info:
+      path: Corner/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Corner
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        UIRequiredDeviceCapabilities:
+          - arm64
+        LSRequiresIPhoneOS: false
+        GCSupportedGameControllers: []
+        GCSupportsControllerUserInteraction: true
+        UIUserInterfaceStyle: Dark
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: false
+
+  CornerTests:
+    type: bundle.unit-test
+    platform: tvOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: CornerTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.oguzhankayan.corner.tests
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: Corner
+
+schemes:
+  Corner:
+    build:
+      targets:
+        Corner: all
+        CornerTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - CornerTests
+    archive:
+      config: Release
