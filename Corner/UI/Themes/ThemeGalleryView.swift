@@ -22,9 +22,13 @@ struct ThemeGalleryView: View {
                         .focused($focusedTheme, equals: theme.id)
                     }
                 }
+                // A little room for the focused card's lift; `scrollClipDisabled`
+                // then lets its glow spill past the scroll view's edges instead
+                // of being hard‑clipped (top/bottom and the first/last card).
                 .padding(.horizontal, 90)
-                .padding(.vertical, 24)
+                .padding(.vertical, 30)
             }
+            .scrollClipDisabled()
 
             if let focused = focusedTheme.map({ ThemeCatalog.theme(for: $0) }) {
                 HStack(spacing: 14) {

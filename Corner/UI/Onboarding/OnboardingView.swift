@@ -101,6 +101,7 @@ struct OnboardingView: View {
                     .focusSection()
                 }
                 .frame(height: 234)
+                .scrollClipDisabled()   // let the focused swatch's glow spill past the row
 
                 Button { finish() } label: {
                     Text("Start watching").frame(minWidth: 240)

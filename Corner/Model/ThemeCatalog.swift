@@ -8,6 +8,7 @@ public enum ThemeCatalog {
 
     public static func theme(for id: ThemeID) -> Theme {
         switch id {
+        case .dvd:           return dvd
         case .classicDVD:    return classicDVD
         case .neon:          return neon
         case .synthwave:     return synthwave
@@ -18,6 +19,35 @@ public enum ThemeCatalog {
     }
 
     public static var all: [Theme] { ThemeID.allCases.map(theme(for:)) }
+
+    // MARK: - Classic DVD (the original mark, the bundled `newlogo` vector)
+
+    /// Same look as `classicDVD` (deep near‑black, no glow/trail, the standard
+    /// colour cycle) but the bouncing shape is the original logo SVG rather than
+    /// the "your word" badge.
+    public static let dvd = Theme(
+        id: .dvd,
+        name: ThemeID.dvd.displayName,
+        tagline: ThemeID.dvd.tagline,
+        background: BackgroundStyle(kind: .solid, stops: [RGBA(hex: "#04050A")], vignette: 0.30, grain: 0.02),
+        logo: LogoAppearance(shape: .vectorOutline, vectorResource: "newlogo", baseEdge: 320,
+                             tintFollowsCollision: true, fixedColor: .white, fillOpacity: 1),
+        glow: .none,
+        trail: .none,
+        particles: ParticleSpec(
+            bounceBurst: .init(count: 7, speed: 60, speedJitter: 30, lifetime: 0.35, size: 3),
+            cornerBurst: .init(count: 90, speed: 300, speedJitter: 140, lifetime: 1.0, size: 4),
+            ambient: .none
+        ),
+        postEffect: .none,
+        audio: ThemeAudioSet(bounce: .bounceSoft, logoCollision: .logoCollision,
+                             cornerHit: .cornerHit, nearMiss: .nearMiss, suggestedAmbient: .roomTone),
+        collisionPalette: [
+            RGBA(hex: "#FFFFFF"), RGBA(hex: "#1FB6FF"), RGBA(hex: "#FF2EC4"),
+            RGBA(hex: "#FFD23F"), RGBA(hex: "#7CFF6B"), RGBA(hex: "#FF7A3D"),
+            RGBA(hex: "#A06BFF"), RGBA(hex: "#28E0C8"),
+        ]
+    )
 
     // MARK: - Classic (the badge with your word — the default)
 
