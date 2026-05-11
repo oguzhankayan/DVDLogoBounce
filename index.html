@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corner — Retro Screensaver for Apple TV</title>
+<meta name="description" content="The classic bouncing-logo screensaver for Apple TV — with your name on the disc. Six themes, deep customization, and the perfect corner hit, finally celebrated.">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(120% 80% at 50% -10%, #0d1330 0%, #05060a 60%);
+    color: #e8e9ee; min-height: 100vh; padding: 0 20px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 96px 0 64px; }
+  .badge { font-size: 13px; letter-spacing: .28em; text-transform: uppercase; color: #8b90a3; font-weight: 700; }
+  h1 { font-size: clamp(40px, 9vw, 64px); font-weight: 800; letter-spacing: -.02em; margin: 14px 0 6px; }
+  .sub { font-size: clamp(18px, 4vw, 22px); color: #b9bdca; max-width: 34ch; }
+  .disc {
+    display: inline-block; margin-top: 28px; padding: 14px 30px; border-radius: 999px;
+    background: linear-gradient(135deg, #19e3ff, #ff2d95); color: #05060a; font-weight: 800;
+    letter-spacing: .12em; text-transform: uppercase; transform: rotate(-3deg);
+    box-shadow: 0 14px 50px rgba(255,45,149,.25);
+  }
+  h2 { font-size: 13px; letter-spacing: .22em; text-transform: uppercase; color: #8b90a3; font-weight: 700; margin: 56px 0 14px; }
+  ul { list-style: none; }
+  li { padding: 12px 0; border-top: 1px solid rgba(255,255,255,.07); }
+  li b { color: #fff; }
+  .links { margin-top: 48px; display: flex; gap: 14px; flex-wrap: wrap; }
+  a.btn {
+    display: inline-block; padding: 12px 22px; border-radius: 14px; text-decoration: none; font-weight: 700;
+    background: rgba(255,255,255,.08); color: #e8e9ee; border: 1px solid rgba(255,255,255,.12);
+  }
+  a.btn:hover { background: rgba(255,255,255,.14); }
+  footer { margin-top: 64px; font-size: 14px; color: #6a6f80; border-top: 1px solid rgba(255,255,255,.07); padding-top: 20px; }
+  footer a { color: #9aa0b3; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="badge">Apple TV · Screensaver</div>
+  <h1>Corner</h1>
+  <p class="sub">The classic bouncing-logo screensaver — with your name on the disc.</p>
+  <div class="disc">your name</div>
+
+  <h2>What it does</h2>
+  <ul>
+    <li><b>Your word on the disc.</b> Type your name, your channel, anything — it rides the bouncing badge and re-tints on every wall bounce.</li>
+    <li><b>Six themes.</b> Classic, Neon, Synthwave, Minimal White, Retro CRT, VHS — each restyles the logo, glow, background and particles. CRT and VHS add their own post-processing.</li>
+    <li><b>The corner hit, finally celebrated.</b> A counter that never forgets, "time since last perfect corner", session streaks, a per-corner breakdown — plus an optional flash and screen pulse.</li>
+    <li><b>Make it yours.</b> Speed, logo size, logo count, custom background colour, inter-logo collisions, and three display modes — Single, Multi, Chaos. Everything updates live.</li>
+    <li><b>Built for the couch.</b> Minimal auto-hiding controls, a streamer/ambient mode, 60 fps, low-memory. Just leave it on.</li>
+    <li><b>Honest.</b> Paid once. No subscription, no ads, no account, no tracking — your statistics never leave your Apple TV.</li>
+  </ul>
+
+  <div class="links">
+    <a class="btn" href="support.html">Support</a>
+    <a class="btn" href="https://github.com/oguzhankayan/DVDLogoBounce">Source / GitHub</a>
+  </div>
+
+  <footer>
+    © 2026 Oğuzhan Kayan · <a href="support.html">Support</a> · Made for Apple TV.<br>
+    "Corner" is an original app; the on-screen mark shows your own text. Not affiliated with any disc-format trademark holder.
+  </footer>
+</div>
+</body>
+</html>
