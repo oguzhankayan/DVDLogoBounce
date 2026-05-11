@@ -1,5 +1,6 @@
 import SwiftUI
 import SpriteKit
+import UIKit
 
 /// Hosts the live `BounceScene` and the lightweight, auto‑hiding chrome that
 /// sits over it: the HUD, the corner‑hit flash, the transient "perfect corner"
@@ -52,13 +53,19 @@ struct ScreensaverView: View {
             }
         }
         .ignoresSafeArea()
-        .focusable(true)
+        // Only focusable when it's the active layer. When the menu or onboarding
+        // is up, a focusable full‑screen view underneath them steals directional
+        // input from their controls (focus "vanishes" when you press an arrow).
+        .focusable(!router.isMenuPresented && !router.inOnboarding)
         .focused($focused)
         .onExitCommand { router.handleExitCommand() }
         .onPlayPauseCommand { vm.setPaused(!vm.isPaused) }
         .onMoveCommand { _ in pokeHUD() }
         .onAppear {
             vm.start(reduceMotion: reduceMotion)
+            // This *is* the screensaver, so don't let tvOS dim the screen or
+            // bring up its own screensaver over it. (Restored when backgrounded.)
+            UIApplication.shared.isIdleTimerDisabled = true
             if !router.inOnboarding { focused = true }
             pokeHUD()
         }
@@ -70,12 +77,21 @@ struct ScreensaverView: View {
         .onChange(of: router.inOnboarding) { _, inOnboarding in
             if !inOnboarding { focused = true; pokeHUD() }
         }
-        .onChange(of: vm.transientBanner) { _, _ in pokeHUD() }
+        // A perfect corner flashes the HUD (you want to see the new total); a
+        // "so close" near‑miss shows only its own banner — no counter, no controls.
+        .onChange(of: vm.transientBanner) { _, banner in
+            if banner?.kind == .perfectCorner { pokeHUD() }
+        }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
-            case .active:                vm.appDidBecomeActive()
-            case .inactive, .background:  vm.appWillResignActive()
-            @unknown default:             break
+            case .active:
+                vm.appDidBecomeActive()
+                UIApplication.shared.isIdleTimerDisabled = true
+            case .inactive, .background:
+                vm.appWillResignActive()
+                UIApplication.shared.isIdleTimerDisabled = false
+            @unknown default:
+                break
             }
         }
         .animation(.easeInOut(duration: 0.45), value: vm.isPaused)
@@ -83,7 +99,7 @@ struct ScreensaverView: View {
     }
 
     private var showHUD: Bool {
-        settings.hudEnabled && !settings.streamerModeEnabled && !router.isMenuPresented
+        settings.hudEnabled && !settings.streamerModeEnabled && !router.isMenuPresented && !router.inOnboarding
     }
 
     private func pokeHUD() {
@@ -106,9 +122,9 @@ struct ScreensaverView: View {
                         .font(.system(size: 56, weight: .bold))
                     Text("Paused")
                         .font(.system(size: 44, weight: .heavy, design: .rounded))
-                    Text("Press ▶︎ to resume · Press Menu for options")
+                    Text("Press Play/Pause to resume · Press Menu for options")
                         .font(.system(.title3, design: .rounded))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.6))
                 }
             }
         }
@@ -133,20 +149,20 @@ struct CornerBannerView: View {
                 Text(banner.corner.displayName)
             }
             .font(.system(.title3, design: .rounded).weight(.semibold))
-            .foregroundStyle(.secondary)
+            .foregroundStyle(.white.opacity(0.65))
         }
         .padding(.vertical, 22)
         .padding(.horizontal, 40)
         .background {
-            Capsule().fill(.ultraThinMaterial)
-                .overlay(Capsule().strokeBorder(.white.opacity(isPerfect ? 0.35 : 0.12), lineWidth: 1))
+            Capsule().fill(Color.black.opacity(0.55))
+                .overlay(Capsule().strokeBorder(.white.opacity(isPerfect ? 0.4 : 0.14), lineWidth: 1))
         }
         .shadow(color: .white.opacity(isPerfect ? 0.25 : 0), radius: 30)
         .scaleEffect(appear ? 1 : 0.9)
         .opacity(appear ? 1 : 0)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .padding(.top, 90)
-        .onAppear { withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) { appear = true } }
+        .onAppear { withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) { appear = true } }
     }
 }
 

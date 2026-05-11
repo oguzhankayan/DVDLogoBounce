@@ -10,11 +10,11 @@ struct SettingSection<Content: View>: View {
     @ViewBuilder var content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 20) {
             SectionHeader(title: title, subtitle: caption)
-            VStack(spacing: 14) { content }
+            VStack(spacing: 16) { content }
         }
-        .padding(.bottom, 8)
+        .padding(.bottom, 12)
     }
 }
 
@@ -29,7 +29,7 @@ struct RemoteSlider: View {
     var accent: Color = .accentColor
     var onChange: ((Double) -> Void)? = nil
 
-    @State private var focused = false
+    @FocusState private var isFocused: Bool
 
     private var fraction: CGFloat {
         let span = range.upperBound - range.lowerBound
@@ -40,24 +40,25 @@ struct RemoteSlider: View {
 
     var body: some View {
         GeometryReader { geo in
-            let trackHeight: CGFloat = focused ? 16 : 10
-            let thumb: CGFloat = focused ? 32 : 22
+            let trackHeight: CGFloat = isFocused ? 16 : 10
+            let thumb: CGFloat = isFocused ? 32 : 22
             let usable = max(0, geo.size.width - thumb)
             ZStack(alignment: .leading) {
                 Capsule().fill(.white.opacity(0.10)).frame(height: trackHeight)
-                Capsule().fill(focused ? AnyShapeStyle(accent) : AnyShapeStyle(.white.opacity(0.55)))
+                Capsule().fill(isFocused ? AnyShapeStyle(accent) : AnyShapeStyle(.white.opacity(0.55)))
                     .frame(width: thumb + usable * fraction, height: trackHeight)
                 Circle()
                     .fill(.white)
                     .frame(width: thumb, height: thumb)
                     .overlay(Circle().strokeBorder(.white.opacity(0.2), lineWidth: 1))
-                    .shadow(color: accent.opacity(focused ? 0.5 : 0), radius: focused ? 14 : 0)
+                    .shadow(color: accent.opacity(isFocused ? 0.5 : 0), radius: isFocused ? 14 : 0)
                     .offset(x: usable * fraction)
             }
             .frame(maxHeight: .infinity)
         }
         .frame(height: 34)
-        .focusable(true) { focused = $0 }
+        .focusable()
+        .focused($isFocused)
         .onMoveCommand { direction in
             switch direction {
             case .left:  set(value - increment)
@@ -65,7 +66,7 @@ struct RemoteSlider: View {
             default:     break
             }
         }
-        .animation(.spring(response: 0.28, dampingFraction: 0.75), value: focused)
+        .animation(.spring(response: 0.28, dampingFraction: 0.88), value: isFocused)
         .animation(.easeOut(duration: 0.12), value: value)
     }
 
@@ -86,20 +87,25 @@ struct SliderRow: View {
     var format: (Double) -> String
 
     var body: some View {
-        GlassCard(cornerRadius: 22, padding: 22) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
+        GlassCard(cornerRadius: 22, padding: 24) {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .firstTextBaseline) {
                     Text(title).font(.system(.title3, design: .rounded).weight(.semibold))
-                    Spacer()
+                    Spacer(minLength: 24)
                     Text(format(value))
                         .font(.system(.title3, design: .rounded).weight(.bold))
                         .monospacedDigit()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.65))
                 }
                 if let caption {
-                    Text(caption).font(.system(.subheadline, design: .rounded)).foregroundStyle(.tertiary)
+                    Text(caption)
+                        .font(.system(.subheadline, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.5))
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 RemoteSlider(value: $value, range: range, step: step)
+                    .padding(.top, 2)
             }
         }
     }
@@ -123,6 +129,9 @@ struct IntSliderRow: View {
     }
 }
 
+/// A whole‑row toggle. The native tvOS `Toggle` recolours its label with the
+/// focus tint (blue), which clashes with the rest of the screen — so this is a
+/// plain focusable button with an "On / Off" pill, styled like every other row.
 struct ToggleRow: View {
     var title: String
     var caption: String?
@@ -131,24 +140,44 @@ struct ToggleRow: View {
     var enabled: Bool = true
 
     var body: some View {
-        GlassCard(cornerRadius: 22, padding: 22) {
-            Toggle(isOn: $isOn) {
-                HStack(spacing: 12) {
-                    if let systemImage {
-                        Image(systemName: systemImage).font(.system(.title3, design: .rounded))
-                            .foregroundStyle(.secondary)
-                    }
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(title).font(.system(.title3, design: .rounded).weight(.semibold))
-                        if let caption {
-                            Text(caption).font(.system(.subheadline, design: .rounded)).foregroundStyle(.tertiary)
-                        }
+        Button {
+            guard enabled else { return }
+            isOn.toggle()
+        } label: {
+            HStack(alignment: .firstTextBaseline, spacing: 24) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(title).font(.system(.title3, design: .rounded).weight(.semibold))
+                    if let caption {
+                        Text(caption)
+                            .font(.system(.subheadline, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.5))
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
+                Spacer(minLength: 0)
+                StatePill(on: isOn)
             }
-            .disabled(!enabled)
-            .opacity(enabled ? 1 : 0.45)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .buttonStyle(CardButtonStyle(cornerRadius: 22))
+        .disabled(!enabled)
+        .opacity(enabled ? 1 : 0.4)
+    }
+}
+
+private struct StatePill: View {
+    var on: Bool
+    var body: some View {
+        Text(on ? "On" : "Off")
+            .font(.system(.subheadline, design: .rounded).weight(.bold))
+            .foregroundStyle(on ? Color.black : .white.opacity(0.55))
+            .frame(minWidth: 40)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 14)
+            .background(Capsule().fill(on ? AnyShapeStyle(.white.opacity(0.9)) : AnyShapeStyle(Color.clear)))
+            .overlay(Capsule().strokeBorder(.white.opacity(on ? 0 : 0.25), lineWidth: 1.5))
+            .animation(.easeOut(duration: 0.15), value: on)
     }
 }
 
@@ -162,11 +191,15 @@ struct ChipPickerRow<T: Hashable>: View {
     var onSelect: ((T) -> Void)? = nil
 
     var body: some View {
-        GlassCard(cornerRadius: 22, padding: 22) {
-            VStack(alignment: .leading, spacing: 12) {
+        GlassCard(cornerRadius: 22, padding: 24) {
+            VStack(alignment: .leading, spacing: 14) {
                 Text(title).font(.system(.title3, design: .rounded).weight(.semibold))
                 if let caption {
-                    Text(caption).font(.system(.subheadline, design: .rounded)).foregroundStyle(.tertiary)
+                    Text(caption)
+                        .font(.system(.subheadline, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.5))
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 HStack(spacing: 12) {
                     ForEach(options, id: \.value) { option in
@@ -182,6 +215,7 @@ struct ChipPickerRow<T: Hashable>: View {
                         .buttonStyle(ChipButtonStyle(selected: option.value == selection))
                     }
                 }
+                .padding(.top, 2)
             }
         }
     }
@@ -201,13 +235,13 @@ struct ChipButtonStyle: ButtonStyle {
             label
                 .padding(.horizontal, 18)
                 .background {
-                    Capsule().fill(selected ? AnyShapeStyle(.white.opacity(0.92)) : AnyShapeStyle(.ultraThinMaterial))
+                    Capsule().fill(selected ? AnyShapeStyle(.white.opacity(0.92)) : AnyShapeStyle(Color.black.opacity(0.40)))
                 }
                 .foregroundStyle(selected ? Color.black : Color.white)
-                .overlay { Capsule().strokeBorder(.white.opacity(isFocused ? 0.5 : (selected ? 0 : 0.12)), lineWidth: isFocused ? 2 : 1) }
+                .overlay { Capsule().strokeBorder(.white.opacity(isFocused ? 0.6 : (selected ? 0 : 0.12)), lineWidth: isFocused ? 2 : 1) }
                 .scaleEffect(isPressed ? 0.95 : (isFocused ? 1.08 : 1.0))
-                .animation(.spring(response: 0.28, dampingFraction: 0.7), value: isFocused)
-                .animation(.spring(response: 0.18, dampingFraction: 0.7), value: isPressed)
+                .animation(.spring(response: 0.28, dampingFraction: 0.88), value: isFocused)
+                .animation(.spring(response: 0.18, dampingFraction: 0.9), value: isPressed)
         }
     }
 }
@@ -220,11 +254,15 @@ struct ColorSwatchRow: View {
     var presets: [RGBA]
 
     var body: some View {
-        GlassCard(cornerRadius: 22, padding: 22) {
-            VStack(alignment: .leading, spacing: 12) {
+        GlassCard(cornerRadius: 22, padding: 24) {
+            VStack(alignment: .leading, spacing: 14) {
                 Text(title).font(.system(.title3, design: .rounded).weight(.semibold))
                 if let caption {
-                    Text(caption).font(.system(.subheadline, design: .rounded)).foregroundStyle(.tertiary)
+                    Text(caption)
+                        .font(.system(.subheadline, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.5))
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 HStack(spacing: 14) {
                     ForEach(presets.indices, id: \.self) { i in
@@ -264,8 +302,8 @@ struct SwatchButtonStyle: ButtonStyle {
                     Circle().strokeBorder(.white.opacity(isFocused ? 0.9 : (selected ? 0.6 : 0)), lineWidth: isFocused ? 3 : 2)
                 }
                 .scaleEffect(isPressed ? 0.92 : (isFocused ? 1.18 : (selected ? 1.06 : 1.0)))
-                .animation(.spring(response: 0.28, dampingFraction: 0.7), value: isFocused)
-                .animation(.spring(response: 0.18, dampingFraction: 0.7), value: isPressed)
+                .animation(.spring(response: 0.28, dampingFraction: 0.9), value: isFocused)
+                .animation(.spring(response: 0.18, dampingFraction: 0.9), value: isPressed)
         }
     }
 }

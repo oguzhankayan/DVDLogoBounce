@@ -94,7 +94,7 @@ final class StatisticsTests: XCTestCase {
 
     func testCodableRoundTrip() throws {
         var s = Statistics()
-        s.record(CornerHitEvent(corner: .topRight, speed: 250, themeID: .matrix))
+        s.record(CornerHitEvent(corner: .topRight, speed: 250, themeID: .vhs))
         s.recordWallBounce(count: 7)
         s.addRunTime(123)
         let data = try JSONEncoder().encode(s)
@@ -122,9 +122,9 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertEqual(s.displayMode, .chaos)
         XCTAssertEqual(s.logoCount, DisplayMode.chaos.seed.logoCount)
         XCTAssertTrue(s.interLogoCollisions)
-        s.applyMode(.cinematic)
-        XCTAssertEqual(s.displayMode, .cinematic)
-        XCTAssertEqual(s.logoCount, DisplayMode.cinematic.seed.logoCount)
+        s.applyMode(.single)
+        XCTAssertEqual(s.displayMode, .single)
+        XCTAssertEqual(s.logoCount, DisplayMode.single.seed.logoCount)
         XCTAssertFalse(s.interLogoCollisions)
     }
 

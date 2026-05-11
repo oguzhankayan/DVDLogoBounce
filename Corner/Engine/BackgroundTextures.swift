@@ -16,7 +16,7 @@ enum BackgroundTextures {
         let s = min(1, maxDim / max(size.width, size.height))
         let renderSize = CGSize(width: max(2, (size.width * s).rounded()),
                                 height: max(2, (size.height * s).rounded()))
-        let format = UIGraphicsImageRendererFormat.default()
+        let format = UIGraphicsImageRendererFormat.preferred()
         format.opaque = true
         format.scale = 1
         let image = UIGraphicsImageRenderer(size: renderSize, format: format).image { ctx in
@@ -53,7 +53,7 @@ enum BackgroundTextures {
         let s = min(1, maxDim / max(size.width, size.height))
         let renderSize = CGSize(width: max(2, (size.width * s).rounded()),
                                 height: max(2, (size.height * s).rounded()))
-        let format = UIGraphicsImageRendererFormat.default()
+        let format = UIGraphicsImageRendererFormat.preferred()
         format.opaque = false
         format.scale = 1
         let edgeAlpha = min(0.95, strength)

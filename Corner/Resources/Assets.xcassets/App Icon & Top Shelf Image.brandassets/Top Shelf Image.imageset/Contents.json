@@ -2,11 +2,8 @@
   "images" : [
     {
       "idiom" : "tv",
-      "scale" : "1x"
-    },
-    {
-      "idiom" : "tv",
-      "scale" : "2x"
+      "scale" : "1x",
+      "filename" : "TopShelf.png"
     }
   ],
   "info" : {

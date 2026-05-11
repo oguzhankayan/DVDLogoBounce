@@ -51,8 +51,8 @@ public enum CollisionResolver {
                 if vb.magnitude > 0 { vb2 = vb2.with(magnitude: vb.magnitude) }
                 entities[i].velocity = va2
                 entities[j].velocity = vb2
-                entities[i].colorIndex &+= 1
-                entities[j].colorIndex &+= 1
+                // NB: colour cycling is the *scene's* job — it dedupes pairs that
+                // stay overlapped across frames so a stuck pair doesn't strobe.
                 collided.append((i, j))
             }
         }

@@ -1,70 +1,64 @@
 import SwiftUI
 
-/// The "About" page — also the app's quiet statement of intent: this is an
-/// ambient visualiser and a customizable retro screensaver, not a prank.
+/// The "About" page — also the app's quiet statement of intent: an ambient
+/// visualiser and a customizable retro screensaver, not a prank.
+///
+/// Nothing here is interactive, so each block is made (invisibly) focusable —
+/// that's what lets the remote scroll the page and the menu capture the Menu
+/// button. Without it, focus is stranded after the page transition and Menu
+/// quits the app.
 struct AboutView: View {
-    @EnvironmentObject private var settings: AppSettings
-
-    private var version: String {
-        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
-        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
-        return "\(v) (\(b))"
-    }
+    @FocusState private var focused: Int?
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
-                ScreenTitle(title: "About Corner", subtitle: "A premium retro bouncing screensaver experience for Apple TV.")
+                ScreenTitle(title: "About", subtitle: "Corner · Retro Screensaver · for Apple TV")
 
                 GlassCard {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("What this is")
                             .font(.system(.title2, design: .rounded).weight(.bold))
                         Text("""
-                        Corner is an ambient visualiser inspired by the bouncing DVD‑logo screensaver — \
-                        rebuilt for big modern TVs. Leave it running for nostalgia, for relaxation, for the \
-                        soft hum of a synth pad, or for the small, genuine thrill of a perfect corner hit. \
-                        It is not a joke app: there are eight hand‑tuned themes, deep customization, multiple \
-                        display modes, an ambient audio system, on‑device statistics, and a careful, quiet UI.
+                        The classic bouncing‑logo screensaver, scaled up for big modern TVs — with your \
+                        own word on the badge. Leave it running for nostalgia, for relaxation, or for the \
+                        small, real thrill of a perfect corner hit: six hand‑tuned themes, three display \
+                        modes, on‑device statistics.
                         """)
                         .font(.system(.title3, design: .rounded))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.6))
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
                     }
                 }
+                .scrollBlock($focused, 0)
 
                 GlassCard {
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("Honest pricing").font(.system(.title2, design: .rounded).weight(.bold))
-                        Label("Paid once, up front — no subscription.", systemImage: "checkmark.seal.fill")
-                        Label("No ads. Ever.", systemImage: "checkmark.seal.fill")
-                        Label("No account. No sign‑in.", systemImage: "checkmark.seal.fill")
-                        Label("No analytics, no tracking — your statistics never leave this Apple TV.", systemImage: "checkmark.seal.fill")
+                        Text("Pricing").font(.system(.title2, design: .rounded).weight(.bold))
+                        Label("Paid once, up front. No subscription.", systemImage: "checkmark.seal.fill")
+                        Label("No ads.", systemImage: "checkmark.seal.fill")
+                        Label("No account, no sign‑in.", systemImage: "checkmark.seal.fill")
+                        Label("No analytics, no tracking. Your statistics never leave this Apple TV.", systemImage: "checkmark.seal.fill")
                     }
                     .font(.system(.title3, design: .rounded))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white.opacity(0.65))
                 }
+                .scrollBlock($focused, 1)
 
                 GlassCard {
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 14) {
                         Text("Tips").font(.system(.title2, design: .rounded).weight(.bold))
-                        bullet("Press the Menu button anytime to open this menu; press it again to return to the screensaver.")
+                        bullet("The bouncing badge shows the word from Customize → Logo. Make it your name, your channel, anything.")
+                        bullet("Press Menu to open this menu; press it again to go back to the screensaver.")
                         bullet("Press Play/Pause to freeze the bounce.")
-                        bullet("Turn on Streamer / ambient mode (in Customize) for a clean stream background — no flashes, no banners.")
-                        bullet("Use Shuffle layout on the menu to re‑roll the starting positions.")
+                        bullet("Streamer / ambient mode (in Customize) gives a clean stream background: no flashes, no banners.")
+                        bullet("Shuffle layout re‑randomises where the logos start.")
                     }
                     .font(.system(.title3, design: .rounded))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white.opacity(0.65))
                 }
-
-                HStack(spacing: 12) {
-                    InfoChip(text: "Version \(version)", systemImage: "number")
-                    InfoChip(text: "Current theme: \(settings.resolvedTheme.name)", systemImage: "paintpalette")
-                    InfoChip(text: "tvOS · SwiftUI · SpriteKit", systemImage: "tv")
-                }
-
-                Text("“Corner” · also explored: Bounce TV · Retro Bounce · Pixel Drift · Neon Bounce · Infinite Bounce · VHS Drift")
-                    .font(.system(.footnote, design: .rounded))
-                    .foregroundStyle(.tertiary)
+                .scrollBlock($focused, 2)
 
                 Color.clear.frame(height: 40)
             }
@@ -73,16 +67,25 @@ struct AboutView: View {
             .frame(maxWidth: 1200, alignment: .leading)
             .frame(maxWidth: .infinity)
         }
+        .onAppear { DispatchQueue.main.async { focused = 0 } }
     }
 
     private func bullet(_ text: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
-            Image(systemName: "circle.fill").font(.system(size: 7)).foregroundStyle(.tertiary)
-            Text(text)
+            Image(systemName: "circle.fill").font(.system(size: 7)).foregroundStyle(.white.opacity(0.35))
+            Text(text).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
         }
     }
 }
 
+/// Makes a non‑interactive block invisibly focusable so the remote can scroll
+/// past it (and a parent `onExitCommand` keeps capturing the Menu button).
+private extension View {
+    func scrollBlock(_ binding: FocusState<Int?>.Binding, _ index: Int) -> some View {
+        self.focusable().focusEffectDisabled().focused(binding, equals: index)
+    }
+}
+
 #Preview("About") {
-    AboutView().injecting(.preview(themeID: .glassmorphism))
+    AboutView().injecting(.preview(themeID: .vhs))
 }

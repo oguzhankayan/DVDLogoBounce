@@ -18,20 +18,26 @@ public final class AppSettings: ObservableObject {
     public static let unitRange: ClosedRange<Double> = 0...1
     public static let autoHideDelayRange: ClosedRange<TimeInterval> = 4...20
     public static let volumeRange: ClosedRange<Double> = 0...1
+    public static let logoTextMaxLength = 14
 
     // MARK: Visual
 
     @Published public var themeID: ThemeID { didSet { persist() } }
     @Published public private(set) var displayMode: DisplayMode { didSet { persist() } }
-    @Published public var logoCount: Int { didSet { clamp(&logoCount, Self.logoCountRange); persist() } }
-    @Published public var speed: Double { didSet { clamp(&speed, Self.speedRange); persist() } }
-    @Published public var logoScale: Double { didSet { clamp(&logoScale, Self.logoScaleRange); persist() } }
-    @Published public var trailIntensity: Double { didSet { clamp(&trailIntensity, Self.unitRange); persist() } }
-    @Published public var glowIntensity: Double { didSet { clamp(&glowIntensity, Self.unitRange); persist() } }
-    @Published public var motionBlur: Double { didSet { clamp(&motionBlur, Self.unitRange); persist() } }
+    @Published public var logoCount: Int { didSet { let c = logoCount.clamped(to: Self.logoCountRange); if c != logoCount { logoCount = c }; persist() } }
+    @Published public var speed: Double { didSet { let c = speed.clamped(to: Self.speedRange); if c != speed { speed = c }; persist() } }
+    @Published public var logoScale: Double { didSet { let c = logoScale.clamped(to: Self.logoScaleRange); if c != logoScale { logoScale = c }; persist() } }
+    @Published public var trailIntensity: Double { didSet { let c = trailIntensity.clamped(to: Self.unitRange); if c != trailIntensity { trailIntensity = c }; persist() } }
+    @Published public var glowIntensity: Double { didSet { let c = glowIntensity.clamped(to: Self.unitRange); if c != glowIntensity { glowIntensity = c }; persist() } }
+    @Published public var motionBlur: Double { didSet { let c = motionBlur.clamped(to: Self.unitRange); if c != motionBlur { motionBlur = c }; persist() } }
     /// "Screensaver density" — scales ambient particle counts & bounce bursts.
-    @Published public var particleDensity: Double { didSet { clamp(&particleDensity, Self.unitRange); persist() } }
+    @Published public var particleDensity: Double { didSet { let c = particleDensity.clamped(to: Self.unitRange); if c != particleDensity { particleDensity = c }; persist() } }
     @Published public var interLogoCollisions: Bool { didSet { persist() } }
+    /// The word shown in the bouncing badge logo (the `.discBadge` themes). Empty
+    /// falls back to a default; capped so it can't blow out the layout.
+    @Published public var customLogoText: String {
+        didSet { let t = String(customLogoText.prefix(Self.logoTextMaxLength)); if t != customLogoText { customLogoText = t }; persist() }
+    }
     @Published public var customBackgroundEnabled: Bool { didSet { persist() } }
     @Published public var customBackgroundColor: RGBA { didSet { persist() } }
 
@@ -50,13 +56,13 @@ public final class AppSettings: ObservableObject {
 
     @Published public var soundEffectsEnabled: Bool { didSet { persist() } }
     @Published public var ambientMode: AmbientMode { didSet { persist() } }
-    @Published public var sfxVolume: Double { didSet { clamp(&sfxVolume, Self.volumeRange); persist() } }
-    @Published public var ambientVolume: Double { didSet { clamp(&ambientVolume, Self.volumeRange); persist() } }
+    @Published public var sfxVolume: Double { didSet { let c = sfxVolume.clamped(to: Self.volumeRange); if c != sfxVolume { sfxVolume = c }; persist() } }
+    @Published public var ambientVolume: Double { didSet { let c = ambientVolume.clamped(to: Self.volumeRange); if c != ambientVolume { ambientVolume = c }; persist() } }
 
     // MARK: Experience / UX
 
     @Published public var autoHideUI: Bool { didSet { persist() } }
-    @Published public var autoHideDelay: TimeInterval { didSet { clamp(&autoHideDelay, Self.autoHideDelayRange); persist() } }
+    @Published public var autoHideDelay: TimeInterval { didSet { let c = autoHideDelay.clamped(to: Self.autoHideDelayRange); if c != autoHideDelay { autoHideDelay = c }; persist() } }
     @Published public var reduceMotion: Bool { didSet { persist() } }
     /// Streamer / "ambient" mode: never auto‑hide *into* a menu, never flash —
     /// just the screensaver, forever, until the user explicitly opens the menu.
@@ -84,6 +90,7 @@ public final class AppSettings: ObservableObject {
         motionBlur = s.motionBlur
         particleDensity = s.particleDensity
         interLogoCollisions = s.interLogoCollisions
+        customLogoText = s.customLogoText
         customBackgroundEnabled = s.customBackgroundEnabled
         customBackgroundColor = s.customBackgroundColor
         cornerFlashEnabled = s.cornerFlashEnabled
@@ -119,6 +126,7 @@ public final class AppSettings: ObservableObject {
             speed: speed, logoScale: logoScale, trailIntensity: trailIntensity,
             glowIntensity: glowIntensity, motionBlur: motionBlur,
             particleDensity: particleDensity, interLogoCollisions: interLogoCollisions,
+            customLogoText: customLogoText,
             customBackgroundEnabled: customBackgroundEnabled,
             customBackgroundColor: customBackgroundColor,
             cornerFlashEnabled: cornerFlashEnabled,
@@ -146,6 +154,7 @@ public final class AppSettings: ObservableObject {
         motionBlur = s.motionBlur
         particleDensity = s.particleDensity
         interLogoCollisions = s.interLogoCollisions
+        customLogoText = s.customLogoText
         customBackgroundEnabled = s.customBackgroundEnabled
         customBackgroundColor = s.customBackgroundColor
         cornerFlashEnabled = s.cornerFlashEnabled
@@ -203,10 +212,6 @@ public final class AppSettings: ObservableObject {
         saveSubject.send(())
     }
 
-    private func clamp<T: Comparable>(_ value: inout T, _ range: ClosedRange<T>) {
-        let c = value.clamped(to: range)
-        if c != value { value = c }   // re‑enters didSet once with a settled value
-    }
 
     // MARK: Codable snapshot
 
@@ -221,6 +226,7 @@ public final class AppSettings: ObservableObject {
         public var motionBlur: Double
         public var particleDensity: Double
         public var interLogoCollisions: Bool
+        public var customLogoText: String
         public var customBackgroundEnabled: Bool
         public var customBackgroundColor: RGBA
         public var cornerFlashEnabled: Bool
@@ -247,9 +253,10 @@ public final class AppSettings: ObservableObject {
             logoScale: 1.0,
             trailIntensity: 0.35,
             glowIntensity: 0.5,
-            motionBlur: 0.15,
+            motionBlur: 0.0,
             particleDensity: 0.5,
             interLogoCollisions: false,
+            customLogoText: "CORNER",
             customBackgroundEnabled: false,
             customBackgroundColor: RGBA(hex: "#05060A"),
             cornerFlashEnabled: true,
@@ -286,6 +293,7 @@ public final class AppSettings: ObservableObject {
             motionBlur = dec(.motionBlur, d.motionBlur)
             particleDensity = dec(.particleDensity, d.particleDensity)
             interLogoCollisions = dec(.interLogoCollisions, d.interLogoCollisions)
+            customLogoText = dec(.customLogoText, d.customLogoText)
             customBackgroundEnabled = dec(.customBackgroundEnabled, d.customBackgroundEnabled)
             customBackgroundColor = dec(.customBackgroundColor, d.customBackgroundColor)
             cornerFlashEnabled = dec(.cornerFlashEnabled, d.cornerFlashEnabled)
@@ -309,6 +317,7 @@ public final class AppSettings: ObservableObject {
             themeID: ThemeID, displayMode: DisplayMode, logoCount: Int, speed: Double,
             logoScale: Double, trailIntensity: Double, glowIntensity: Double,
             motionBlur: Double, particleDensity: Double, interLogoCollisions: Bool,
+            customLogoText: String,
             customBackgroundEnabled: Bool, customBackgroundColor: RGBA,
             cornerFlashEnabled: Bool, cornerParticlesEnabled: Bool, screenShakeEnabled: Bool,
             cornerSoundEnabled: Bool, closeCallEffectsEnabled: Bool, hudEnabled: Bool,
@@ -326,6 +335,7 @@ public final class AppSettings: ObservableObject {
             self.motionBlur = motionBlur
             self.particleDensity = particleDensity
             self.interLogoCollisions = interLogoCollisions
+            self.customLogoText = customLogoText
             self.customBackgroundEnabled = customBackgroundEnabled
             self.customBackgroundColor = customBackgroundColor
             self.cornerFlashEnabled = cornerFlashEnabled

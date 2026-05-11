@@ -92,11 +92,20 @@ public struct LogoAppearance: Hashable, Sendable {
         case ring
         /// A chunky pixel block (Matrix / 8‑bit).
         case pixelBlock
+        /// A vector silhouette loaded from a bundled flat SVG (`vectorResource`),
+        /// rasterised crisp at TV scale and tinted with the cycling collision colour.
+        case vectorOutline
+        /// The "[WORD] over a disc" badge — a bold condensed wordmark (from
+        /// `wordmark`, normally the user's custom text) above a flat ellipse with a
+        /// centre hole. The DVD‑screensaver *form*, with your own word.
+        case discBadge
     }
 
     public var shape: Shape
     /// Word shown for `.badge` / `.wordmark` styles.
     public var wordmark: String
+    /// Resource name (no extension) of the bundled `.svg` used by `.vectorOutline`.
+    public var vectorResource: String?
     /// Single character for `.monogram`.
     public var monogram: Character
     /// PostScript font name; `nil` ⇒ a heavy system rounded font.
@@ -119,6 +128,7 @@ public struct LogoAppearance: Hashable, Sendable {
     public init(
         shape: Shape,
         wordmark: String = "CORNER",
+        vectorResource: String? = nil,
         monogram: Character = "C",
         fontName: String? = nil,
         baseEdge: CGFloat = 280,
@@ -131,6 +141,7 @@ public struct LogoAppearance: Hashable, Sendable {
     ) {
         self.shape = shape
         self.wordmark = wordmark
+        self.vectorResource = vectorResource
         self.monogram = monogram
         self.fontName = fontName
         self.baseEdge = baseEdge

@@ -92,7 +92,7 @@ RootView
 │  ├─ SettingsView           (SettingSection × {Mode, Motion, Look, Corner Hit, Audio, Experience})
 │  ├─ StatisticsView         (StatTile grid + per-corner bars)
 │  └─ AboutView
-└─ OnboardingView            (4 pages: welcome → theme → corner hit → make it yours)
+└─ OnboardingView            (one screen: "your name on the disc" field → theme swatches → "Start watching")
 ```
 
 ## State & data flow
@@ -198,8 +198,9 @@ reuse; until that capture succeeds, glow/trails are simply skipped (graceful).
 A `Theme` is a pure value type bundling a `BackgroundStyle`, `LogoAppearance`,
 `GlowSpec`, `TrailSpec`, `ParticleSpec`, a `PostEffect`, a `ThemeAudioSet`, and a
 `collisionPalette` (the colours the logo cycles through on each bounce).
-`ThemeCatalog` is the static library of the eight built‑ins. The same `Theme` data
-drives three renderers:
+`ThemeCatalog` is the static library of the six built‑ins (Classic, Neon,
+Synthwave, Minimal White, Retro CRT, VHS). The same `Theme` data drives three
+renderers:
 
 - **SpriteKit** — `BounceScene` translates `BackgroundStyle` → gradient/vignette/
   grain textures; `LogoAppearance` → vector geometry (`badge` / `wordmark` /

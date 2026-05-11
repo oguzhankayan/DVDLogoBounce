@@ -26,6 +26,13 @@ public enum CornerOutcome: Equatable, Sendable {
 }
 
 public struct CornerHitDetector: Sendable {
+    /// How close (points) the trailing edge must be to *its* wall on a single‑axis
+    /// bounce for the step to register as a perfect corner. A discrete `dt` step
+    /// "rounds off" true corners, so requiring both edges to overshoot on the
+    /// exact same step would make a perfect corner almost unreachable — this small
+    /// slop (a couple of pixels at TV scale, invisible) is what makes "it touched
+    /// the corner" actually count.
+    public var perfectCornerTolerance: CGFloat
     /// How close (points) the trailing edge must be to its wall on a single‑axis
     /// bounce for the step to register as a close call.
     public var closeCallTolerance: CGFloat
@@ -33,16 +40,25 @@ public struct CornerHitDetector: Sendable {
     /// off, in which case we don't even classify them).
     public var detectCloseCalls: Bool
 
-    public init(closeCallTolerance: CGFloat, detectCloseCalls: Bool = true) {
+    public init(closeCallTolerance: CGFloat, perfectCornerTolerance: CGFloat = 0, detectCloseCalls: Bool = true) {
         self.closeCallTolerance = max(0, closeCallTolerance)
+        self.perfectCornerTolerance = max(0, perfectCornerTolerance)
         self.detectCloseCalls = detectCloseCalls
     }
 
     public func classify(_ impact: WallImpact?) -> CornerOutcome {
         guard let impact, impact.hitAnything else { return .none }
 
+        // A true same‑step double overshoot, or a single‑axis bounce that grazed
+        // the other wall within a hair: either way, the logo was *in* the corner.
         if impact.isExactCorner, let h = impact.horizontal, let v = impact.vertical {
             return .perfectCorner(Self.corner(h: h, v: v))
+        }
+        if let h = impact.horizontal, impact.gapToNearestVerticalWall <= perfectCornerTolerance {
+            return .perfectCorner(Self.corner(h: h, v: impact.nearestVerticalWall))
+        }
+        if let v = impact.vertical, impact.gapToNearestHorizontalWall <= perfectCornerTolerance {
+            return .perfectCorner(Self.corner(h: impact.nearestHorizontalWall, v: v))
         }
 
         if detectCloseCalls {

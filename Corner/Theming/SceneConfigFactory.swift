@@ -17,7 +17,10 @@ enum SceneConfigFactory {
     static func makeConfig(from settings: AppSettings,
                            seed: UInt64,
                            reduceMotionOverride: Bool = false) -> SceneConfig {
-        let theme = settings.resolvedTheme
+        var theme = settings.resolvedTheme
+        // The bouncing badge shows the user's word; non‑badge themes ignore it.
+        let name = settings.customLogoText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !name.isEmpty { theme.logo.wordmark = name }
         let reduceMotion = settings.reduceMotion || reduceMotionOverride
 
         // Effective trail / glow combine the *theme's* intensity with the user's

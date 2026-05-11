@@ -9,7 +9,8 @@ struct ThemeGalleryView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
-            ScreenTitle(title: "Themes", subtitle: "Each restyles the logo, glow, background, particles, trails and sound.")
+            ScreenTitle(title: "Themes", subtitle: "Each restyles the logo, background, glow, particles and sound.")
+                .padding(.horizontal, 90)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 28) {
@@ -147,6 +148,39 @@ private struct ThemePreview: View {
                 .foregroundStyle((theme.logo.foregroundColor ?? .black).color)
                 .frame(width: 64, height: 64)
                 .background(Rectangle().fill(color.color))
+        case .vectorOutline:
+            VectorOutlineThumbnail(resource: theme.logo.vectorResource, tint: color.color)
+                .frame(width: 96, height: 64)
+        case .discBadge:
+            DiscBadgeMark(text: theme.logo.wordmark, tint: color.color, scale: 1.3)
+        }
+    }
+}
+
+/// Static preview of a `.vectorOutline` logo for the theme gallery — the SVG's
+/// own coordinate space is already y‑down, so it maps straight into SwiftUI.
+private struct VectorOutlineThumbnail: View {
+    let resource: String?
+    let tint: Color
+
+    var body: some View {
+        GeometryReader { geo in
+            if let name = resource, let parsed = SVGOutline.load(named: name),
+               geo.size.width > 0, geo.size.height > 0,
+               case let bb = parsed.path.boundingBoxOfPath, bb.width > 0, bb.height > 0 {
+                let k = min(geo.size.width / bb.width, geo.size.height / bb.height)
+                var t = CGAffineTransform(translationX: -bb.minX, y: -bb.minY)
+                    .concatenating(CGAffineTransform(scaleX: k, y: k))
+                let scaled = parsed.path.copy(using: &t) ?? parsed.path
+                Path(scaled)
+                    .fill(tint, style: FillStyle(eoFill: true))
+                    .frame(width: bb.width * k, height: bb.height * k)
+                    .frame(width: geo.size.width, height: geo.size.height)
+            } else {
+                Image(systemName: "questionmark.square.dashed")
+                    .foregroundStyle(tint)
+                    .frame(width: geo.size.width, height: geo.size.height)
+            }
         }
     }
 }
@@ -166,5 +200,5 @@ private struct ScanlineOverlay: View {
 }
 
 #Preview("Themes") {
-    ThemeGalleryView().injecting(.preview(themeID: .matrix))
+    ThemeGalleryView().injecting(.preview(themeID: .neon))
 }

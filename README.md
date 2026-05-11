@@ -1,43 +1,50 @@
-# Corner — A Premium Retro Bouncing Screensaver for Apple TV
+# Corner — Retro Screensaver (Apple TV)
 
-> *"A premium retro bouncing screensaver experience for Apple TV."*
+> *"The classic bouncing‑logo screensaver, scaled up for big modern TVs — with your name on the disc."*
 
-**Corner** is a polished, ambient tvOS app inspired by the classic bouncing DVD‑logo
-screensaver. It is built for modern large‑screen TVs and designed to be left running
-for hours — for ambiance, nostalgia, relaxation, and the eternal hunt for the
-**perfect corner hit**.
+**Corner** is an ambient tvOS app: the classic bouncing‑logo screensaver, rebuilt
+for large‑screen TVs and designed to be left running for hours, for ambiance,
+nostalgia, and the eternal hunt for the **perfect corner hit**.
 
 This repository contains the full Swift / SwiftUI / SpriteKit implementation, the
 tvOS navigation structure, the theme engine, the physics & corner‑hit detection
-system, settings persistence, the audio system, and the App Store positioning /
-ASO / design documentation.
+system, settings persistence, and the audio system.
 
 ---
 
 ## Highlights
 
-- **60 fps SpriteKit renderer** tuned for Apple TV — sub‑pixel motion interpolation,
-  pooled trail ghosts, programmatic particles, optional CRT / VHS fragment shaders.
+- **Your word on the disc** — the bouncing badge shows whatever you type (your
+  name, your channel, anything, up to 14 characters); it re‑tints to the active
+  theme's palette on every wall bounce. Set it during the one‑screen onboarding or
+  any time from Customize.
+- **60 fps SpriteKit renderer** tuned for Apple TV: sub‑pixel motion interpolation,
+  programmatic particles, optional CRT / VHS fragment shaders.
 - **Exact corner‑hit detection** with a tunable "close‑call" window, a per‑corner
-  counter, session streaks, and a full statistics screen including
-  *"time since last perfect corner."*
-- **8 hand‑tuned themes** — Classic DVD, Neon, Synthwave, Minimal White, Retro CRT,
-  Glassmorphism, Matrix, VHS — each restyling the logo, glow, background, particles,
-  trails, and sound.
-- **Ambient audio system** — silent / soft collision SFX / VHS hum / synth pad,
-  with independent SFX and ambience volume.
-- **Deep customization** — speed, logo size, logo count, trail intensity, glow,
-  motion blur, background tint, screensaver density, inter‑logo collisions.
-- **Display modes** — Single, Multi, Chaos, and a slow Cinematic mode.
-- **Native tvOS feel** — focus‑engine‑friendly UI, auto‑hiding chrome, cinematic
-  fades, large‑readability typography, Siri Remote `Menu`/swipe controls.
-- **Premium design language** — dark luxury, subtle glassmorphism, soft gradients,
-  bloom, intentional typography.
+  counter, session streaks, and a statistics screen including *"time since the
+  last perfect corner."*
+- **6 hand‑tuned themes** — Classic, Neon, Synthwave, Minimal White, Retro CRT, and
+  VHS — each restyling the logo colour, background, glow, particles and sound; two
+  (Retro CRT, VHS) add a bespoke fragment‑shader post effect.
+- **Display modes** — Single, Multi, Chaos.
+- **Customization** — the logo text, speed, logo size, logo count, inter‑logo
+  collisions, a custom background colour, the corner‑hit celebration (flash /
+  particles / screen shake / close‑call effects), the on‑screen counter, auto‑hide,
+  reduce motion, and a streamer mode.
+- **Native tvOS feel** — focus‑engine‑friendly flat UI, auto‑hiding chrome, gentle
+  fades, large‑readability typography, Siri Remote `Menu` / `Play‑Pause` / swipe
+  controls. Disables the system idle timer while running so tvOS doesn't take over.
 
 ## Monetization
 
-Paid up front (target **$0.99 – $2.99**). No subscription, no ads, no accounts,
-no tracking.
+Paid up front. No subscription, no ads, no accounts, no tracking; statistics never
+leave the device.
+
+> **Before submitting to the App Store:** drop in an app icon / Top Shelf image
+> (`Corner/Resources/Assets.xcassets`), optionally the sound files
+> (`Corner/Resources/Sounds/`, the app is silent without them), and set
+> `DEVELOPMENT_TEAM` in `project.yml`. The on‑screen mark is the app's own
+> wordmark/badge — no trademarked logo ships in the app.
 
 ---
 
@@ -89,6 +96,8 @@ Then pick the **Corner** scheme and an **Apple TV** simulator (tvOS 17+) and run
 - [`Docs/DESIGN.md`](Docs/DESIGN.md) — visual language, color, typography, motion,
   asset specifications.
 - [`Docs/ROADMAP.md`](Docs/ROADMAP.md) — post‑launch ideas.
+- [`Docs/PRIVACY.md`](Docs/PRIVACY.md) — the privacy policy (also at
+  <https://oguzhankayan.github.io/DVDLogoBounce/privacy.html>); Corner collects no data.
 
 ## License
 

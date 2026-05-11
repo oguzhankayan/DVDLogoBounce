@@ -39,6 +39,7 @@ extension CGVector {
 
 extension CGPoint {
     static func + (p: CGPoint, v: CGVector) -> CGPoint { CGPoint(x: p.x + v.dx, y: p.y + v.dy) }
+    static func - (p: CGPoint, v: CGVector) -> CGPoint { CGPoint(x: p.x - v.dx, y: p.y - v.dy) }
     static func - (a: CGPoint, b: CGPoint) -> CGVector { CGVector(dx: a.x - b.x, dy: a.y - b.y) }
 
     func distance(to p: CGPoint) -> CGFloat { (self - p).magnitude }

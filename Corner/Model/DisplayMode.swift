@@ -11,8 +11,6 @@ public enum DisplayMode: String, CaseIterable, Codable, Identifiable, Sendable {
     case multi
     /// Many fast logos, hard collisions on, heavier particles. Controlled chaos.
     case chaos
-    /// One or two logos, very slow, long trails, motion blur up. Film‑like.
-    case cinematic
 
     public var id: String { rawValue }
 
@@ -21,7 +19,6 @@ public enum DisplayMode: String, CaseIterable, Codable, Identifiable, Sendable {
         case .single:    return "Single"
         case .multi:     return "Multi"
         case .chaos:     return "Chaos"
-        case .cinematic: return "Cinematic"
         }
     }
 
@@ -30,7 +27,6 @@ public enum DisplayMode: String, CaseIterable, Codable, Identifiable, Sendable {
         case .single:    return "One logo. Pure and patient."
         case .multi:     return "A few logos sharing the screen."
         case .chaos:     return "Many fast logos, hard collisions, more sparks."
-        case .cinematic: return "Slow, long trails, soft motion blur."
         }
     }
 
@@ -47,17 +43,14 @@ public enum DisplayMode: String, CaseIterable, Codable, Identifiable, Sendable {
     public var seed: Seed {
         switch self {
         case .single:
-            return Seed(logoCount: 1, speed: 1.0, trailIntensity: 0.35,
-                        motionBlur: 0.15, interLogoCollisions: false, particleDensity: 0.5)
+            return Seed(logoCount: 1, speed: 1.0, trailIntensity: 0,
+                        motionBlur: 0, interLogoCollisions: false, particleDensity: 0.5)
         case .multi:
-            return Seed(logoCount: 5, speed: 1.05, trailIntensity: 0.4,
-                        motionBlur: 0.2, interLogoCollisions: true, particleDensity: 0.6)
+            return Seed(logoCount: 5, speed: 1.05, trailIntensity: 0,
+                        motionBlur: 0, interLogoCollisions: true, particleDensity: 0.6)
         case .chaos:
-            return Seed(logoCount: 11, speed: 1.7, trailIntensity: 0.5,
-                        motionBlur: 0.3, interLogoCollisions: true, particleDensity: 0.95)
-        case .cinematic:
-            return Seed(logoCount: 2, speed: 0.55, trailIntensity: 0.85,
-                        motionBlur: 0.7, interLogoCollisions: false, particleDensity: 0.4)
+            return Seed(logoCount: 11, speed: 1.7, trailIntensity: 0,
+                        motionBlur: 0.12, interLogoCollisions: true, particleDensity: 0.95)
         }
     }
 }

@@ -54,6 +54,10 @@ public final class BounceScene: SKScene {
     // Simulation
     private var entities: [LogoEntity] = []
     private var logoNodes: [LogoNode] = []
+    /// Logo pairs currently overlapping (key = `a*256 + b`, `a < b`). A collision
+    /// "event" (recolour / spark / sound) only fires when a pair *enters* this
+    /// set — otherwise two logos that bump and drift together would strobe.
+    private var collidingPairs: Set<Int> = []
     private var detector = CornerHitDetector(closeCallTolerance: 26)
     private lazy var trail = TrailController(layer: trailLayer)
     private var rng = SeededRandom(seed: 1)
@@ -188,7 +192,14 @@ public final class BounceScene: SKScene {
         }
 
         if sceneConfig.interLogoCollisions, entities.count > 1 {
-            for (a, b) in CollisionResolver.resolve(&entities) {
+            let pairs = CollisionResolver.resolve(&entities)   // physics runs every frame
+            var stillTouching: Set<Int> = []
+            for (a, b) in pairs {
+                let key = a * 256 + b
+                stillTouching.insert(key)
+                guard !collidingPairs.contains(key) else { continue }   // already counted — don't strobe
+                entities[a].colorIndex &+= 1
+                entities[b].colorIndex &+= 1
                 recolor(a, animated: true)
                 recolor(b, animated: true)
                 let mid = CGPoint(x: (entities[a].position.x + entities[b].position.x) / 2,
@@ -196,6 +207,9 @@ public final class BounceScene: SKScene {
                 spawnBounceBurst(at: mid, color: logoNodes[a].currentColor)
                 sceneDelegate?.bounceScene(self, didProduce: .logoCollision(a: a, b: b))
             }
+            collidingPairs = stillTouching
+        } else if !collidingPairs.isEmpty {
+            collidingPairs.removeAll()
         }
 
         for i in entities.indices { logoNodes[i].position = entities[i].position }
@@ -218,7 +232,10 @@ public final class BounceScene: SKScene {
         rebuildBackground()
         rebuildAmbientField()
 
-        detector.closeCallTolerance = max(sceneConfig.cornerCloseCallTolerance, size.width * 0.010)
+        // ~1.2% of the screen width counts as a perfect corner (a tight but
+        // achievable "it touched"); the close‑call ring sits outside that.
+        detector.perfectCornerTolerance = max(6, size.width * 0.012)
+        detector.closeCallTolerance = max(sceneConfig.cornerCloseCallTolerance, size.width * 0.02, detector.perfectCornerTolerance * 1.8)
         detector.detectCloseCalls = sceneConfig.closeCallEffectsEnabled
 
         trail.configure(spec: sceneConfig.theme.trail, userIntensity: sceneConfig.trailIntensity)
@@ -313,6 +330,7 @@ public final class BounceScene: SKScene {
         logoLayer.removeAllChildren()
         entities.removeAll(keepingCapacity: true)
         logoNodes.removeAll(keepingCapacity: true)
+        collidingPairs.removeAll(keepingCapacity: true)
         trail.reset()
 
         rng = SeededRandom(seed: sceneConfig.seed == 0 ? 0xC0FFEE : sceneConfig.seed)

@@ -1,5 +1,6 @@
 import SpriteKit
 import CoreImage
+import UIKit
 
 /// Renders one `LogoAppearance` as a SpriteKit node tree:
 ///
@@ -41,6 +42,8 @@ final class LogoNode: SKNode {
         case fill(SKShapeNode)
         case stroke(SKShapeNode)
         case label(SKLabelNode)
+        /// A white silhouette sprite tinted via `colorBlendFactor` (vector logos).
+        case sprite(SKSpriteNode)
     }
 
     init(appearance: LogoAppearance, scaleFactor: CGFloat, color: RGBA, glow: GlowSpec, glowUserIntensity: CGFloat) {
@@ -144,6 +147,10 @@ final class LogoNode: SKNode {
             case .stroke(let n): n.strokeColor = rgba.skColor
             case .label(let n):
                 if appearance.foregroundColor == nil { n.fontColor = rgba.autoContrastingForeground.skColor }
+            case .sprite(let n):
+                n.colorBlendFactor = 1
+                n.color = rgba.skColor
+                n.alpha = appearance.fillOpacity
             }
         }
         // Glow follows the logo colour unless the theme pins it.
@@ -310,6 +317,144 @@ final class LogoNode: SKNode {
             var targets: [TintTarget] = [.fill(shape), .stroke(shape)]
             if a.foregroundColor == nil { targets.append(.label(label)) }
             return BuiltGeometry(nodes: [shape, label], tintTargets: targets, size: CGSize(width: side, height: side))
+
+        case .vectorOutline:
+            if let name = a.vectorResource, let g = outlineGeometry(named: name, longestEdge: edge) {
+                return g
+            }
+            // Asset missing / unparseable — degrade to a plain wordmark so the
+            // screensaver still runs instead of showing nothing.
+            let label = SKLabelNode(fontNamed: heavyFont(a.fontName))
+            label.text = a.wordmark.uppercased()
+            label.fontSize = edge * 0.5
+            label.verticalAlignmentMode = .center
+            label.horizontalAlignmentMode = .center
+            label.fontColor = (a.foregroundColor ?? a.fixedColor).skColor
+            var targets: [TintTarget] = []
+            if a.foregroundColor == nil { targets.append(.label(label)) }
+            return BuiltGeometry(nodes: [label], tintTargets: targets,
+                                 size: CGSize(width: max(label.frame.width, edge * 0.6), height: label.frame.height))
+
+        case .discBadge:
+            return discBadgeGeometry(text: a.wordmark, fontName: a.fontName, longestEdge: edge)
         }
+    }
+
+    /// "[WORD] over a disc" — the DVD‑screensaver *form* with an arbitrary word.
+    /// Rendered once to a high‑res white silhouette texture (so the donut needs no
+    /// fill‑rule gymnastics and the text stays crisp), then the sprite is scaled so
+    /// its longest side equals `edge` — the word's width can't be known up front.
+    /// Rendered‑once badge textures (the bitmap depends only on text + font; the
+    /// sprite is scaled afterwards), so a theme switch or a re‑seed doesn't redraw.
+    private static var discBadgeCache: [String: (texture: SKTexture, ratio: CGSize)] = [:]
+
+    private static func discBadgeGeometry(text: String, fontName: String?, longestEdge edge: CGFloat) -> BuiltGeometry {
+        let display = (text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "CORNER" : text).uppercased()
+        let cacheKey = "\(display)|\(fontName ?? "")"
+        if let cached = discBadgeCache[cacheKey] {
+            let k = edge / max(cached.ratio.width, cached.ratio.height)
+            let pointSize = CGSize(width: cached.ratio.width * k, height: cached.ratio.height * k)
+            let sprite = SKSpriteNode(texture: cached.texture)
+            sprite.size = pointSize
+            sprite.colorBlendFactor = 1
+            return BuiltGeometry(nodes: [sprite], tintTargets: [.sprite(sprite)], size: pointSize)
+        }
+        let renderFont: CGFloat = 220
+        // Heavy + *condensed* (so the word doesn't run absurdly wide) + a touch of
+        // obliqueness — evokes the DVD‑logo lettering without copying it. Custom
+        // `fontName` (if a theme sets one) overrides the system condensed face.
+        let font = fontName.flatMap { UIFont(name: $0, size: renderFont) }
+            ?? UIFont.systemFont(ofSize: renderFont, weight: .black, width: .condensed)
+        let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: UIColor.white, .obliqueness: 0.14]
+        let str = NSAttributedString(string: display, attributes: attrs)
+        let wm = str.size()
+        // Trim the font's leading: uppercase glyphs are `capHeight` tall, but the
+        // line box (`wm.height`) includes empty ascender/descender space — keeping
+        // it would pad the hitbox with invisible pixels (so a "perfect corner"
+        // would fire while there's still a visible gap). Draw flush to the cap.
+        let topPad = max(0, font.ascender - font.capHeight)
+        let bottomTrim = max(0, -font.descender)   // uppercase has no descenders
+        let wmW = max(1, ceil(wm.width + renderFont * 0.10))   // a hair of slant slack
+        let wmH = max(1, ceil(wm.height - topPad - bottomTrim))
+
+        // A flat‑ish ellipse below the word, a bit wider than it, with a centre hole.
+        let discW = max(wmW * 0.96, renderFont * 0.6) + renderFont * 0.2
+        let discH = max(wmH * 0.6, renderFont * 0.3)
+        let holeW = discW * 0.20, holeH = discH * 0.46
+        let gap = wmH * 0.14   // breathing room between the word and the disc
+
+        let texW = max(wmW, discW), texH = wmH + gap + discH
+        // Super‑sample (and mip‑map below) so thin parts of a condensed glyph don't
+        // shimmer/alias while the badge moves on a 4K panel — most visible under a
+        // strong additive glow. Capped so a long word can't blow up the bitmap.
+        let supersample = max(1, min(3, 2400 / max(texW, texH)))
+        let fmt = UIGraphicsImageRendererFormat.preferred()
+        fmt.scale = supersample
+        fmt.opaque = false
+        let image = UIGraphicsImageRenderer(size: CGSize(width: texW, height: texH), format: fmt).image { ctx in
+            let c = ctx.cgContext
+            // Shift up by `topPad` so the cap‑top of the glyphs lands at y == 0.
+            str.draw(at: CGPoint(x: (texW - wmW) / 2, y: -topPad))
+            let disc = CGRect(x: (texW - discW) / 2, y: wmH + gap, width: discW, height: discH)
+            let hole = CGRect(x: (texW - holeW) / 2, y: wmH + gap + (discH - holeH) / 2, width: holeW, height: holeH)
+            c.addEllipse(in: disc)
+            c.addEllipse(in: hole)
+            c.setFillColor(UIColor.white.cgColor)
+            c.fillPath(using: .evenOdd)
+        }
+
+        let texture = SKTexture(image: image)
+        texture.usesMipmaps = true
+        discBadgeCache[cacheKey] = (texture, CGSize(width: texW, height: texH))
+
+        let k = edge / max(texW, texH)
+        let pointSize = CGSize(width: texW * k, height: texH * k)
+        let sprite = SKSpriteNode(texture: texture)
+        sprite.size = pointSize
+        sprite.colorBlendFactor = 1
+        return BuiltGeometry(nodes: [sprite], tintTargets: [.sprite(sprite)], size: pointSize)
+    }
+
+    /// Cache so we only parse each SVG once per process.
+    private static var outlineCache: [String: SVGOutline.Parsed] = [:]
+
+    /// Rasterise a bundled flat SVG into a white, alpha‑shaped sprite scaled so its
+    /// longest edge is `edge` points. The sprite is tinted later via `applyColor`.
+    private static func outlineGeometry(named name: String, longestEdge edge: CGFloat) -> BuiltGeometry? {
+        let parsed: SVGOutline.Parsed
+        if let c = outlineCache[name] { parsed = c }
+        else if let p = SVGOutline.load(named: name) { outlineCache[name] = p; parsed = p }
+        else { return nil }
+
+        // Scale to the actual ink, not the SVG canvas — exported logos often sit
+        // inside a much larger viewBox (or a white background rect), and using
+        // that would make the bouncing logo tiny with a huge invisible margin.
+        let bb = parsed.path.boundingBoxOfPath
+        guard bb.width > 0, bb.height > 0 else { return nil }
+        let k = edge / max(bb.width, bb.height)
+        let pointSize = CGSize(width: bb.width * k, height: bb.height * k)
+
+        // Super‑sample for crisp edges on 4K panels, but cap the bitmap.
+        let cap: CGFloat = 1600
+        let supersample = max(1, min(3, cap / max(pointSize.width, pointSize.height)))
+        let fmt = UIGraphicsImageRendererFormat.preferred()
+        fmt.scale = supersample
+        fmt.opaque = false
+
+        let image = UIGraphicsImageRenderer(size: pointSize, format: fmt).image { ctx in
+            let c = ctx.cgContext
+            c.translateBy(x: -bb.minX * k, y: -bb.minY * k)
+            c.scaleBy(x: k, y: k)
+            c.addPath(parsed.path)
+            c.setFillColor(UIColor.white.cgColor)
+            c.fillPath(using: .evenOdd)
+        }
+
+        let texture = SKTexture(image: image)
+        texture.usesMipmaps = true
+        let sprite = SKSpriteNode(texture: texture)
+        sprite.size = pointSize
+        sprite.colorBlendFactor = 1
+        return BuiltGeometry(nodes: [sprite], tintTargets: [.sprite(sprite)], size: pointSize)
     }
 }

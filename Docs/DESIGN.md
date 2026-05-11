@@ -27,8 +27,8 @@
 - **Text:** `primary` for values/titles, `secondary` for labels, `tertiary` for
   captions/hints. Always on dark.
 - **Theme accents** are defined in `ThemeCatalog` as each theme's `collisionPalette`
-  (e.g. Neon `#19E3FF / #FF2D95 / #39FF88 …`, Matrix shades of `#00FF41`, VHS muted
-  `#5BBFB3 / #D98EA0 …`). The app's own brand accent (`AccentColor`) is a warm
+  (e.g. Neon `#19E3FF / #FF2D95 / #39FF88 …`, Retro CRT shades of `#39FF7A`, VHS
+  muted `#5BBFB3 / #D98EA0 …`). The app's own brand accent (`AccentColor`) is a warm
   electric blue `#4C6BF2`.
 - **Backgrounds** are per‑theme `BackgroundStyle`s: a solid or a hand‑tuned
   linear/radial gradient + a soft radial vignette (`0.1–0.5`) + optional grain
@@ -40,9 +40,10 @@
 - **System Rounded** everywhere (`design: .rounded`), heavy for titles/values,
   semibold for labels — friendly, modern, reads at distance.
 - **Wordmark "CORNER":** heavy, generous tracking (6–12 pt depending on size).
-- Inside the bouncing badge, the wordmark uses a heavy condensed face
-  (`AvenirNextCondensed-Heavy`) so it fits the classic oval; the CRT/Matrix themes
-  use `Menlo-Bold` for the right "terminal" flavour.
+- Inside the bouncing badge, the user's word is rendered in a heavy, *condensed*,
+  slightly oblique face (the system black-condensed font) so it fits the classic
+  oval; a theme may override it (`LogoAppearance.fontName`) — e.g. Retro CRT leans
+  monospaced for the "terminal" flavour.
 - Numbers are `monospacedDigit()` wherever they tick (HUD counter, "time since…",
   stat tiles, per‑corner bars).
 

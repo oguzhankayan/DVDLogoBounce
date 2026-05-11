@@ -1,12 +1,15 @@
 import SwiftUI
 
-// MARK: - Glass card
+// MARK: - Panel surface
 
-/// A frosted, lightly‑bordered container — the recurring surface for menus,
-/// settings groups, stat tiles, onboarding panels. Subtle on purpose.
+/// A flat, hairline‑bordered container — the recurring surface for menu detail
+/// screens, settings rows, stat blocks, onboarding panels. Deliberately *not*
+/// frosted glass: the menu scrim already supplies the depth, so panels on top of
+/// it read as solid, tinted a hair toward the active theme. Kept the name
+/// `GlassCard` because every screen calls it.
 struct GlassCard<Content: View>: View {
-    var cornerRadius: CGFloat = 28
-    var padding: CGFloat = 28
+    var cornerRadius: CGFloat = 24
+    var padding: CGFloat = 24
     var tint: Color = .white
     @ViewBuilder var content: Content
 
@@ -15,15 +18,14 @@ struct GlassCard<Content: View>: View {
             .padding(padding)
             .background {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(.ultraThinMaterial)
+                    .fill(Color.black.opacity(0.42))
                     .overlay {
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .fill(LinearGradient(colors: [tint.opacity(0.10), .clear],
-                                                 startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .fill(tint.opacity(0.05))
                     }
                     .overlay {
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .strokeBorder(.white.opacity(0.10), lineWidth: 1)
+                            .strokeBorder(.white.opacity(0.07), lineWidth: 1)
                     }
             }
     }
@@ -71,9 +73,10 @@ struct ScreenTitle: View {
     }
 }
 
-// MARK: - Focusable card button style
+// MARK: - Focusable card button
 
-/// tvOS focus feel: a gentle lift + soft glow, no chunky platform chrome.
+/// tvOS focus feel without the platform's chunky chrome: a solid dark panel that
+/// gains an accent fill, an accent ring, a soft glow and a small lift on focus.
 struct CardButtonStyle: ButtonStyle {
     var cornerRadius: CGFloat = 22
     var accent: Color = .white
@@ -97,20 +100,21 @@ struct CardButtonStyle: ButtonStyle {
                 .padding(.horizontal, 26)
                 .background {
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(.ultraThinMaterial)
+                        .fill(Color.black.opacity(0.40))
                         .overlay {
                             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                                .fill(accent.opacity(isFocused ? 0.18 : 0.04))
+                                .fill(accent.opacity(isFocused ? 0.18 : 0))
                         }
                         .overlay {
                             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                                .strokeBorder(.white.opacity(isFocused ? 0.30 : 0.10), lineWidth: 1)
+                                .strokeBorder(isFocused ? accent.opacity(0.7) : .white.opacity(0.08),
+                                              lineWidth: isFocused ? 2 : 1)
                         }
                 }
-                .shadow(color: accent.opacity(isFocused ? 0.35 : 0), radius: isFocused ? 26 : 0, y: 8)
-                .scaleEffect(isPressed ? 0.97 : (isFocused ? 1.06 : 1.0))
-                .animation(.spring(response: 0.32, dampingFraction: 0.7), value: isFocused)
-                .animation(.spring(response: 0.22, dampingFraction: 0.7), value: isPressed)
+                .shadow(color: accent.opacity(isFocused ? 0.30 : 0), radius: isFocused ? 20 : 0, y: 6)
+                .scaleEffect(isPressed ? 0.97 : (isFocused ? 1.05 : 1.0))
+                .animation(.spring(response: 0.3, dampingFraction: 0.88), value: isFocused)
+                .animation(.spring(response: 0.2, dampingFraction: 0.92), value: isPressed)
         }
     }
 }
@@ -134,46 +138,14 @@ struct PrimaryButtonStyle: ButtonStyle {
                 .padding(.vertical, 18)
                 .padding(.horizontal, 40)
                 .background {
-                    Capsule().fill(isFocused ? AnyShapeStyle(accent) : AnyShapeStyle(.ultraThinMaterial))
+                    Capsule().fill(isFocused ? AnyShapeStyle(accent) : AnyShapeStyle(Color.black.opacity(0.45)))
                 }
                 .foregroundStyle(isFocused ? .black : .white)
-                .overlay { Capsule().strokeBorder(.white.opacity(isFocused ? 0 : 0.18), lineWidth: 1) }
-                .shadow(color: accent.opacity(isFocused ? 0.5 : 0), radius: isFocused ? 28 : 0, y: 10)
-                .scaleEffect(isPressed ? 0.96 : (isFocused ? 1.08 : 1.0))
-                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isFocused)
-                .animation(.spring(response: 0.2, dampingFraction: 0.7), value: isPressed)
-        }
-    }
-}
-
-// MARK: - Stat tile
-
-struct StatTile: View {
-    var label: String
-    var value: String
-    var systemImage: String?
-    var accent: Color = .white
-
-    var body: some View {
-        GlassCard(cornerRadius: 24, padding: 24, tint: accent) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 10) {
-                    if let systemImage {
-                        Image(systemName: systemImage)
-                            .font(.system(.title3, design: .rounded))
-                            .foregroundStyle(accent.opacity(0.9))
-                    }
-                    Text(label.uppercased())
-                        .font(.system(.footnote, design: .rounded).weight(.semibold))
-                        .tracking(2)
-                        .foregroundStyle(.secondary)
-                }
-                Text(value)
-                    .font(.system(size: 40, weight: .heavy, design: .rounded))
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+                .overlay { Capsule().strokeBorder(isFocused ? .clear : .white.opacity(0.16), lineWidth: 1) }
+                .shadow(color: accent.opacity(isFocused ? 0.45 : 0), radius: isFocused ? 22 : 0, y: 8)
+                .scaleEffect(isPressed ? 0.96 : (isFocused ? 1.07 : 1.0))
+                .animation(.spring(response: 0.3, dampingFraction: 0.88), value: isFocused)
+                .animation(.spring(response: 0.2, dampingFraction: 0.92), value: isPressed)
         }
     }
 }
@@ -191,7 +163,7 @@ struct InfoChip: View {
         .font(.system(.footnote, design: .rounded).weight(.semibold))
         .padding(.vertical, 8)
         .padding(.horizontal, 14)
-        .background(Capsule().fill(.ultraThinMaterial))
+        .background(Capsule().fill(Color.black.opacity(0.42)))
         .overlay(Capsule().strokeBorder(.white.opacity(0.10), lineWidth: 1))
     }
 }

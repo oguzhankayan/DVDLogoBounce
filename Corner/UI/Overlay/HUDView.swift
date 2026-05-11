@@ -29,36 +29,36 @@ struct HUDView: View {
                         .contentTransition(.numericText())
                     Text("perfect corners")
                         .font(.system(.callout, design: .rounded))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.7))
                 }
                 Text("Last · \(lastCornerLine)")
                     .font(.system(.callout, design: .rounded))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.white.opacity(0.6))
                 if statistics.stats.sessionCornerHits > 0 {
                     Text("This session · \(statistics.stats.sessionCornerHits)")
                         .font(.system(.footnote, design: .rounded))
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.white.opacity(0.5))
                 }
             }
             .padding(.vertical, 18)
             .padding(.horizontal, 24)
             .background {
-                RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.ultraThinMaterial)
-                    .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(.white.opacity(0.10), lineWidth: 1))
+                RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Color.black.opacity(0.5))
+                    .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(.white.opacity(0.12), lineWidth: 1))
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
             // Controls hint (bottom‑trailing)
             HStack(spacing: 14) {
                 Label("Pause", systemImage: "playpause.fill")
-                Text("·").foregroundStyle(.tertiary)
+                Text("·").foregroundStyle(.white.opacity(0.4))
                 Label("Menu", systemImage: "line.3.horizontal")
             }
             .font(.system(.footnote, design: .rounded).weight(.semibold))
-            .foregroundStyle(.secondary)
+            .foregroundStyle(.white.opacity(0.7))
             .padding(.vertical, 10)
             .padding(.horizontal, 16)
-            .background(Capsule().fill(.ultraThinMaterial).overlay(Capsule().strokeBorder(.white.opacity(0.08), lineWidth: 1)))
+            .background(Capsule().fill(Color.black.opacity(0.5)).overlay(Capsule().strokeBorder(.white.opacity(0.10), lineWidth: 1)))
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

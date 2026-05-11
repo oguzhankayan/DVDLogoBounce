@@ -11,7 +11,7 @@ enum ParticleFactory {
     static let softDot: SKTexture = {
         let dim: CGFloat = 32
         let size = CGSize(width: dim, height: dim)
-        let format = UIGraphicsImageRendererFormat.default()
+        let format = UIGraphicsImageRendererFormat.preferred()
         format.opaque = false
         format.scale = 1
         let image = UIGraphicsImageRenderer(size: size, format: format).image { ctx in

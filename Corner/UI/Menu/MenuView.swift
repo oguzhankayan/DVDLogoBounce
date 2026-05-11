@@ -49,7 +49,14 @@ struct MainMenuView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var focus: Focusable?
 
-    private enum Focusable: Hashable { case card(Router.MenuPage), shuffle, resume }
+    private enum Focusable: Hashable { case card(Router.MenuPage), shuffle, resume, mode }
+
+    private func cycleDisplayMode() {
+        let modes = DisplayMode.allCases
+        let i = modes.firstIndex(of: settings.displayMode) ?? 0
+        audio.playUISelect()
+        settings.applyMode(modes[(i + 1) % modes.count])
+    }
 
     var body: some View {
         let theme = settings.resolvedTheme
@@ -59,9 +66,9 @@ struct MainMenuView: View {
                 Text("CORNER")
                     .font(.system(size: 64, weight: .heavy, design: .rounded))
                     .tracking(8)
-                Text("A premium retro bouncing screensaver")
-                    .font(.system(.title3, design: .rounded))
-                    .foregroundStyle(.secondary)
+                Text("RETRO SCREENSAVER")
+                    .font(.system(.subheadline, design: .rounded).weight(.bold)).tracking(5)
+                    .foregroundStyle(.white.opacity(0.45))
             }
             .padding(.bottom, 44)
 
@@ -70,13 +77,13 @@ struct MainMenuView: View {
                 MenuCard(title: "Themes", subtitle: theme.name, systemImage: "paintpalette.fill",
                          accent: theme.collisionColor(at: 1).color) { router.go(to: .themes) }
                     .focused($focus, equals: .card(.themes))
-                MenuCard(title: "Customize", subtitle: "Speed · size · trails · glow", systemImage: "slider.horizontal.3",
+                MenuCard(title: "Customize", subtitle: "Logo text · speed · effects · background", systemImage: "slider.horizontal.3",
                          accent: .white) { router.go(to: .customize) }
                     .focused($focus, equals: .card(.customize))
                 MenuCard(title: "Statistics", subtitle: "\(Format.count(statistics.stats.totalCornerHits)) perfect corners", systemImage: "chart.bar.fill",
                          accent: .white) { router.go(to: .statistics) }
                     .focused($focus, equals: .card(.statistics))
-                MenuCard(title: "About", subtitle: "What this is · monetization", systemImage: "info.circle.fill",
+                MenuCard(title: "About", subtitle: "What this is · how it's priced", systemImage: "info.circle.fill",
                          accent: .white) { router.go(to: .about) }
                     .focused($focus, equals: .card(.about))
             }
@@ -106,11 +113,15 @@ struct MainMenuView: View {
                 .buttonStyle(CardButtonStyle(cornerRadius: 18))
                 .focused($focus, equals: .resume)
 
-                Spacer()
+                Button { cycleDisplayMode() } label: {
+                    Label("Mode: \(settings.displayMode.displayName)", systemImage: "rectangle.3.group")
+                        .font(.system(.headline, design: .rounded).weight(.semibold))
+                        .contentTransition(.opacity)
+                }
+                .buttonStyle(CardButtonStyle(cornerRadius: 18))
+                .focused($focus, equals: .mode)
 
-                InfoChip(text: "\(settings.displayMode.displayName) mode", systemImage: "rectangle.3.group")
-                InfoChip(text: settings.soundEffectsEnabled ? "Sound on" : "Sound off",
-                         systemImage: settings.soundEffectsEnabled ? "speaker.wave.2.fill" : "speaker.slash.fill")
+                Spacer()
             }
         }
         .padding(.horizontal, 90)
