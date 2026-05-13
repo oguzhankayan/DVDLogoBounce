@@ -1,9 +1,9 @@
-# Privacy Policy — Corner
+# Privacy Policy - Corner
 
-_Last updated: 11 May 2026_
+_Last updated: 13 May 2026_
 
-Hosted copy: <https://oguzhankayan.github.io/DVDLogoBounce/privacy.html>
-(also shown verbatim in App Store Connect → App Privacy → "Apple TV Privacy Policy").
+This policy is kept for open-source builds and any local or private tvOS
+distribution of Corner.
 
 ---
 
@@ -38,8 +38,7 @@ and is removed when you delete the app:
 ## Third parties
 
 Corner contains no third-party advertising, analytics, or tracking code. We do not
-sell or share data because we do not have any. Your purchase is handled by Apple
-under Apple's own privacy policy; we do not receive your payment information.
+sell or share data because we do not have any.
 
 ## Children
 

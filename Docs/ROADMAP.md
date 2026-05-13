@@ -25,14 +25,13 @@ Ordered roughly by value‑per‑effort. Nothing here is required for 1.0.
 
 - **More themes** (append‑only `ThemeID`): "Amber Terminal", "Ferrofluid",
   "Aurora", "Blueprint", "Holiday" seasonal.
-- **Custom logo text.** Let the user type a short word/initials for the badge
-  (`LogoAppearance.wordmark` is already data‑driven) — with a gentle profanity
-  filter for the App Store's sake.
+- **Richer badge styles.** Add font, outline, glow, and text animation presets on
+  top of the existing editable badge text.
 - **Photo / shape logo.** Allow a chosen SF Symbol or (later) an imported image as
   the bouncing object.
 - **"Day/Night" auto theme.** Switch Minimal White ↔ a dark theme on a schedule.
 - **Picture frame mode.** A very slow Cinematic preset tuned to be wall‑art‑grade
-  (huge logo, glacial speed, no sound) — markets to the "Apple TV as art" crowd.
+  (huge logo, glacial speed, no sound) for the "Apple TV as art" use case.
 
 ## Statistics & longevity
 
@@ -74,7 +73,7 @@ Ordered roughly by value‑per‑effort. Nothing here is required for 1.0.
 ## Engineering
 
 - Replace the hand‑written `Contents.json` icon scaffold with real artwork; wire a
-  `fastlane` lane for screenshots/App Preview capture.
+  repeatable capture flow for screenshots and short demo clips.
 - A small `XCUITest` smoke test (launch → open menu → switch theme → open stats →
   back).
 - Consider extracting `Engine/` + `Model/` into a Swift package so they can be unit

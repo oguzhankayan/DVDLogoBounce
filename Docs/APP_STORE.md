@@ -1,4 +1,8 @@
-# App Store positioning, ASO & launch — Corner – Retro Screensaver
+# Archived App Store positioning, ASO & launch — Corner – Retro Screensaver
+
+_Archive note, 13 May 2026: Corner is now maintained as an open-source GitHub
+project rather than a commercial App Store release. This document is kept as
+historical product, positioning, and launch-planning context._
 
 ## One‑liner
 

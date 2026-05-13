@@ -97,9 +97,9 @@ final class CornerHitDetectorTests: XCTestCase {
 final class CollisionResolverTests: XCTestCase {
 
     func testOverlappingLogosAreSeparated() {
-        var a = LogoEntity(id: 0, position: CGPoint(x: 100, y: 100),
+        let a = LogoEntity(id: 0, position: CGPoint(x: 100, y: 100),
                            velocity: CGVector(dx: 100, dy: 0), halfSize: CGSize(width: 40, height: 40))
-        var b = LogoEntity(id: 1, position: CGPoint(x: 130, y: 100),
+        let b = LogoEntity(id: 1, position: CGPoint(x: 130, y: 100),
                            velocity: CGVector(dx: -100, dy: 0), halfSize: CGSize(width: 40, height: 40))
         var entities = [a, b]
         let pairs = CollisionResolver.resolve(&entities)
@@ -158,10 +158,10 @@ final class SeededRandomTests: XCTestCase {
     }
 
     func testDailySeedStableWithinDay() {
-        let morning = Date(timeIntervalSince1970: 1_700_000_000)        // some instant
-        let evening = morning.addingTimeInterval(60 * 60 * 8)
-        XCTAssertEqual(SeededRandom.dailySeed(reference: morning), SeededRandom.dailySeed(reference: evening))
-        let nextDay = morning.addingTimeInterval(60 * 60 * 26)
-        XCTAssertNotEqual(SeededRandom.dailySeed(reference: morning), SeededRandom.dailySeed(reference: nextDay))
+        let noonUTC = Date(timeIntervalSince1970: 1_699_963_200)
+        let eveningUTC = noonUTC.addingTimeInterval(60 * 60 * 8)
+        XCTAssertEqual(SeededRandom.dailySeed(reference: noonUTC), SeededRandom.dailySeed(reference: eveningUTC))
+        let nextDayUTC = noonUTC.addingTimeInterval(60 * 60 * 26)
+        XCTAssertNotEqual(SeededRandom.dailySeed(reference: noonUTC), SeededRandom.dailySeed(reference: nextDayUTC))
     }
 }

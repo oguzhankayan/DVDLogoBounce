@@ -35,8 +35,8 @@ struct AboutView: View {
 
                 GlassCard {
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("Pricing").font(.system(.title2, design: .rounded).weight(.bold))
-                        Label("Paid once, up front. No subscription.", systemImage: "checkmark.seal.fill")
+                        Text("Open source").font(.system(.title2, design: .rounded).weight(.bold))
+                        Label("Released under the MIT License.", systemImage: "checkmark.seal.fill")
                         Label("No ads.", systemImage: "checkmark.seal.fill")
                         Label("No account, no sign‑in.", systemImage: "checkmark.seal.fill")
                         Label("No analytics, no tracking. Your statistics never leave this Apple TV.", systemImage: "checkmark.seal.fill")
